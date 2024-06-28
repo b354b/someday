@@ -82,44 +82,116 @@ create sequence sec06
     nocycle
     nocache;
 
-select sec06.NEXTVAL from dual;
+Create trigger tri01 after insert on userss
+referencing new row as nrow
+referencing old row as orow
+for each row
+when nrow.gender = 'm' and nrow.jobs = 'student'
+begin
+  delete from userss
+  where ids = nrow.ids;
+end;
 
-select *
+
+Create trigger tri02 after insert on userss
+referencing new row as nrow
+referencing old row as orow
+for each row
+when nrow.gender = 'f'
+begin
+  delete from userss
+  where ids = nrow.ids;
+end;
+
+
+
+Create view v04 as
+select namess, gender, favorite, jobs
 from userss;
 
-select *
-from goods;
 
-select *
+Create view v05 as
+select enterprises, locations, mains
 from company;
 
-select *
-from all_constraints;
 
-select *
-from userss natural join goods;
-
-select ids, passwords from userss
-union
-select pid, stock from goods;
-
-select ids, passwords from userss
-intersect
-select pid, stock from goods;
-
-select *
-from userss
-where email is null;
-
-select *
+// with check option
+Create view v08 as
+select productName, manufacture
 from goods
-where stock is null;
+with check option;
 
-select *
-from userss
-order by ids desc;
 
-select *
+Select productName
+from goods
+where price = some (
+  select price
+  from goods
+  where series = 'no');
+
+
+Select productName
+from goods
+where price = some (
+  select max(price)
+  from goods
+  where stock > 25);
+
+
+Select ids
 from userss
-order by ids
-;
+where gender != any (
+  select gender
+  from userss
+  where jobs = 'student');
+
+
+Select namess
+from userss
+where jobs = any (
+  select jobs
+  from userss
+  where email is null);
+
+
+Select cID
+from company
+where employee >= all (
+  select employee
+  from company
+  where manufacture = 'red');
+
+
+Select cID
+from company
+where employee != all (
+  select employee
+  from company
+  where locations = 'seoul');
+
+
+Select productName, stock
+from goods
+where manufacture = (
+  select manufacture
+  from company
+  where stock > 10);
+
+
+Select productName, pID, rank() over (order by price desc) as sRank01
+from goods
+order by sRank01;
+
+
+Select cID, rank() over (order by employee) as sRank02
+from company
+order by sRank02;
+
+
+Insert into userss values('poke341', 4456, 'keen', 'm', 'computer', 'student', null);
+
+
+Insert into userss values('mon674', 6842, 'hou', 'f', 'headphone', 'teacher', 'popo12@email.com');
+
+
+
